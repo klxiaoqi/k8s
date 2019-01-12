@@ -36,3 +36,10 @@ apt-get update && apt-get install -y apt-transport-https
 ```
 apt-get install curl
 ```
+## 增加google的安装源 key
+```
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+```
+> 如果此方式失败，请手动获取 https://packages.cloud.google.com/apt/doc/apt-key.gpg 文件，存储在某目录，例如 /home/iota/k8s下，然后执行
+> `apt-key add /home/iota/k8s/apt-key.gpg`
+
