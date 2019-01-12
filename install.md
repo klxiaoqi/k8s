@@ -19,10 +19,20 @@
 10.8.25.150 iota-n1
 
 ```
+---
+# 安装
+---
+
 > 在所有机器上，以root用户执行以下命令
 
 ## apt支持HTTPS源
 
 ```
 apt-get update && apt-get install -y apt-transport-https
+```
+
+## 安装curl工具
+
+```
+apt-get install curl
 ```
