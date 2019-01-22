@@ -62,7 +62,7 @@ kubernetes-cni=0.5.1-00 kubelet=1.8.2-00 kubeadm=1.8.2-00 kubectl=1.8.2-00
 > 需要拉取可用的镜像，并打标签。利用的是蜂巢资源
 
     1 拉取所需镜像
-    
+
 ``` bash
     docker pull hub.c.163.com/ap6108/kubernetes-dashboard-init-amd64:v1.0.1
     docker pull hub.c.163.com/juranzhijia/kubernetes-dashboard-amd64:v1.7.1
@@ -90,9 +90,12 @@ docker tag hub.c.163.com/zhijiansd/k8s-dns-dnsmasq-nanny-amd64:1.14.5 gcr.io/goo
 docker tag hub.c.163.com/ap6108/kubernetes-dashboard-init-amd64:v1.0.1 gcr.io/google_containers/kubernetes-dashboard-init-amd64:v1.0.1
 docker tag hub.c.163.com/juranzhijia/kubernetes-dashboard-amd64:v1.7.1 gcr.io/google_containers/kubernetes-dashboard-amd64:v1.7.1 
 docker tag hub.c.163.com/k8s163/etcd-amd64:3.0.17  gcr.io/google_containers/etcd-amd64:3.0.17 
-```    
+```
 
-## 更改kubelet的启动参数(或者跳过此节，关闭交互分区，见下一节)
+## 更改kubelet的启动参数
+
+> (或者跳过此节，关闭交互分区，见下一节)
+
 kubernetes的标准配置是禁用交换分区的，但是考虑到实际情况，暂时先通过配置项跳过。
 
     1. 修改配置
@@ -202,7 +205,6 @@ kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/v0.9.1/Documen
 ```
 > 网络这里比较复杂，为了简化安装过程，两台设备的配置最好一样，多网卡的情况，需要规划好使用相关的设备口，如果不是默认设备网卡，需要修改kube-flannel.yml，保证使用的网口互通
 
-
 ---
 
 # Node
@@ -253,12 +255,16 @@ kubectl delete pod {podname} -n anxinyun
 kubectl get namespace
 
 # 查看 pods
+kubectl get pod --all-namespaces
 kubectl get pods -n {namespace} -o wide
 
 kubectl get service -n {namespace}
 
 # 查看pod 最后1000条日志
 kubectl logs -n anxinyun {podname} --tail 1000
+
+kubectl describe pod XXX --namespace=XXX
+
 ```
 ---
 ----
@@ -316,3 +322,21 @@ apt purge -y kubelet kubeadm kubectl kubernetes-cni
 systemctl daemon-reload
 ```
 > 然后重新执行上述步骤
+
+
+
+# 扩展节点
+
+```bash
+# 执行下面命令，重新生成token newtoken
+kubeadm token create 
+# 查看token
+kubeadm token list
+# 打印 ca证书sha256编码hash值 sha256_hash
+openssl x509 -pubkey -in /etc/kubernetes/pki/ca.crt | openssl rsa -pubin -outform der 2>/dev/null | openssl dgst -sha256 -hex | sed 's/^.* //'
+# 在节点执行
+kubeadm join masterip:6443 --token ${newtoken} --discovery-token-ca-cert-hash sha256:${sha256_hash} --skip-preflight-checks
+# 在master查看节点状态
+kubectl get nodes
+```
+
